@@ -13,7 +13,7 @@ The v2 artifact was trained on **8,656 usable events across 2025Q4–2026Q3**. T
 1. **Encode facts.** Word unigrams and bigrams become sublinear, L2-normalized TF-IDF features, with a vocabulary capped at 30,000 features.
 2. **Learn complementary signals.** A Ridge outcome head learns return-percentile residuals after a quarter-specific linear earnings-surprise adjustment. A second Ridge head distills the historical reference forecasts supplied in the official archive.
 3. **Combine standardized signals.** Fixed ensemble weights combine the heads and a prior-surprise mean-reversion adjustment. The historical prior is constructed from completed training quarters.
-4. **Scale uncertainty around neutral.** A valid option-implied move scales the signal's distance from 0.50. Missing or invalid option statistics leave that scale unchanged. The output is clipped to [0, 1].
+4. **Scale the forecast around neutral.** A valid option-implied move scales the signal's distance from 0.50. This is a forecast-scaling heuristic, not a calibrated uncertainty estimate. Missing or invalid option statistics leave that scale unchanged. The output is clipped to [0, 1].
 
 Distillation uses archived reference outputs during training; it does not call a live language model at prediction time. Earnings-preview text is not an input to the published v2 model. A separate preview-text candidate was evaluated and excluded.
 
