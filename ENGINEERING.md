@@ -8,7 +8,7 @@ The engineering goal is to turn a reproducible research artifact into a bounded 
 
 The offline path uses pandas, NumPy, and scikit-learn to construct features, fit the Ridge heads, compare quarterly validation results, and export a JSON/gzip artifact. The artifact contains the vocabulary, IDF values, model coefficients, normalization parameters, and frozen historical lookup.
 
-The serving path loads that artifact and reproduces tokenization, sublinear term frequencies, L2 normalization, linear scoring, and ensemble adjustments using Python's standard library. It does not require a live external model-provider request for the published local v2 path.
+The serving path loads that artifact and reproduces tokenization, sublinear term frequencies, L2 normalization, linear scoring, and ensemble adjustments using Python's standard library. The v12 worker also loads precomputed historical text features with timing and text-quality metadata. It checks the prior disclosure against the event cutoff before blending the two forecasts. Both versions run inference locally in the worker.
 
 **Trade-off:** export makes serving lightweight and deterministic, but creates a compatibility boundary. Feature normalization and artifact discovery need tests so research and serving do not silently diverge.
 
@@ -42,13 +42,13 @@ Prediction and submission run in a separate worker. Completed deliveries retain 
 
 ## Fallback behavior
 
-The local model returns neutral 0.50 when required facts or its artifact are unavailable, when no usable vocabulary features are found, or when local inference fails. Unknown tickers receive a neutral historical prior. Missing or invalid option statistics skip the option scaling step. Valid forecasts are clipped to [0, 1].
+When v12 cannot use a prior disclosure, it falls back to the v2 baseline. That baseline returns neutral 0.50 when required facts or its artifact are unavailable, when no usable vocabulary features are found, or when local inference fails. Unknown tickers receive a neutral historical prior. Missing or invalid option statistics skip the option scaling step. Valid forecasts are clipped to [0, 1].
 
 This model fallback is separate from transport reliability: an event-information fetch or submission failure is not proof that a neutral forecast reached the platform. Worker errors are logged, and successful submission is tracked separately from webhook acknowledgement.
 
 ## Verification
 
-**31 offline tests passed on October 30, 2026** across the prediction, text-model, webhook-verification, and Modal-handler suites.
+**Before the v12 rollout, 31 offline tests passed on October 30, 2026** across the prediction, text-model, webhook-verification, and Modal-handler suites.
 
 | Boundary | Representative checks |
 | --- | --- |
